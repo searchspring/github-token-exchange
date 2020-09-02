@@ -13,10 +13,15 @@ type DAO interface {
 	GetUser(clientID, clientSecret, code, redirectURL string) ([]byte, error)
 }
 
-type DAOImpl struct{}
+type DAOImpl struct {
+	Client *http.Client
+}
 
 func NewDAO() DAO {
-	return &DAOImpl{}
+	client := &http.Client{}
+	return &DAOImpl{
+		Client: client,
+	}
 }
 
 type User struct {
@@ -27,7 +32,7 @@ type User struct {
 	Token     string `json:"token"`
 }
 
-func (DAOImpl) GetUser(clientID, clientSecret, code, redirectURL string) ([]byte, error) {
+func (d *DAOImpl) GetUser(clientID, clientSecret, code, redirectURL string) ([]byte, error) {
 	jsonBuffer := bytes.NewBuffer([]byte(`{
 		"client_id":"` + clientID + `",
 		"client_secret":"` + clientSecret + `",
