@@ -16,7 +16,7 @@ var (
 		Name: "githubtokenechange_total_ops",
 		Help: "The total number token exchanges",
 	})
-	opsFailedCountry = promauto.NewCounter(prometheus.CounterOpts{
+	opsFailed = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "githubtokenechange_total_errors",
 		Help: "The total number of errors",
 	})
@@ -27,6 +27,7 @@ func main() {
 	checks()
 	http.Handle("/metrics", promhttp.Handler())
 	http.HandleFunc("/", handler)
+	log.Printf("listening on: %s\n", os.Getenv("PORT"))
 	log.Println(http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("PORT")), nil))
 }
 
@@ -46,9 +47,16 @@ func checks() {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		// we only want to process the root request, this ignores all other queries - for example, from the browser.
+		// as we don't want to count those as errors.
+		return
+	}
+	opsProcessed.Inc()
 	code := r.URL.Query().Get("code")
 	if code == "" {
 		http.Error(w, "no github code found in request", http.StatusBadRequest)
+		opsFailed.Inc()
 		return
 	}
 	clientID := os.Getenv("GITHUB_CLIENT_ID")
@@ -57,6 +65,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	user, err := githubDAO.GetUser(clientID, clientSecret, code, redirectURL)
 	if err != nil {
 		http.Error(w, err.Error(), 403)
+		opsFailed.Inc()
 		return
 	}
 	html := `
