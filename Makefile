@@ -14,7 +14,6 @@ docker-build:
 .PHONY: docker-build
 
 docker-run:
-	@echo running on port 3000
 	@docker run -e PORT='3000' \
 		-e GITHUB_REDIRECT_URL="${GITHUB_REDIRECT_URL}" \
 		-e GITHUB_CLIENT_ID="${GITHUB_CLIENT_ID}" \
