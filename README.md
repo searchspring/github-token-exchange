@@ -1,6 +1,10 @@
 # Github Token Exchange
 
-Takes an Oauth redirect code and exchanges it for a token and the user info and sends that info to localhost:port
+Takes an Oauth redirect code and exchanges it for a token and the user info and sends that info to 
+
+```
+http://localhost:3827?user={"node_id":"value","avatar_url":"value","name":"value","token":"value"}
+```
 
 ## Run with docker
 
