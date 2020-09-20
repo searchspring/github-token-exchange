@@ -13,14 +13,27 @@ type DAO interface {
 	GetUser(clientID, clientSecret, code, redirectURL string) ([]byte, error)
 }
 
+type GithubClient interface {
+	Do(req *http.Request) (*http.Response, error)
+}
+
+type GithubClientImpl struct {
+	client *http.Client
+}
+
+func (g *GithubClientImpl) Do(req *http.Request) (*http.Response, error) {
+	return g.client.Do(req)
+}
+
 type DAOImpl struct {
-	Client *http.Client
+	Client GithubClient
 }
 
 func NewDAO() DAO {
-	client := &http.Client{}
 	return &DAOImpl{
-		Client: client,
+		Client: &GithubClientImpl{
+			client: http.DefaultClient,
+		},
 	}
 }
 
@@ -32,6 +45,16 @@ type User struct {
 	Token     string `json:"token"`
 }
 
+func mustCreateRequest(method string, url string, jsonBuffer *bytes.Buffer) *http.Request {
+	if jsonBuffer == nil {
+		jsonBuffer = bytes.NewBuffer([]byte(``))
+	}
+	req, err := http.NewRequest(method, url, jsonBuffer)
+	if err != nil {
+		panic(err)
+	}
+	return req
+}
 func (d *DAOImpl) GetUser(clientID, clientSecret, code, redirectURL string) ([]byte, error) {
 	jsonBuffer := bytes.NewBuffer([]byte(`{
 		"client_id":"` + clientID + `",
@@ -40,13 +63,9 @@ func (d *DAOImpl) GetUser(clientID, clientSecret, code, redirectURL string) ([]b
 		"redirect_uri":"` + redirectURL + `"
 		}`))
 
-	req, err := http.NewRequest("POST", "https://github.com/login/oauth/access_token", jsonBuffer)
-	if err != nil {
-		return nil, err
-	}
+	req := mustCreateRequest("POST", "https://github.com/login/oauth/access_token", jsonBuffer)
 	req.Header.Set("Content-Type", "application/json")
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	resp, err := d.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -59,12 +78,9 @@ func (d *DAOImpl) GetUser(clientID, clientSecret, code, redirectURL string) ([]b
 	if err != nil {
 		return nil, err
 	}
-	req, err = http.NewRequest("GET", "https://api.github.com/user", nil)
-	if err != nil {
-		return nil, err
-	}
+	req = mustCreateRequest("GET", "https://api.github.com/user", nil)
 	req.Header.Set("Authorization", "token "+token)
-	resp, err = client.Do(req)
+	resp, err = d.Client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +89,6 @@ func (d *DAOImpl) GetUser(clientID, clientSecret, code, redirectURL string) ([]b
 	if err != nil {
 		return nil, err
 	}
-
 	user := &User{}
 	err = json.Unmarshal(body, user)
 	if err != nil {
