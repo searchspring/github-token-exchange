@@ -35,3 +35,12 @@ Create a `.env` file as above.
 ```bash
 make run
 ```
+
+
+## Prod credentials
+
+```
+GITHUB_CLIENT_SECRET=*** find the secret in 1password ***
+GITHUB_CLIENT_ID=5df635731e7fa3513c1d
+GITHUB_REDIRECT_URL=http://token.kube.searchspring.io
+```
