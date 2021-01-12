@@ -1,6 +1,6 @@
 # Github Token Exchange
 
-Takes an Oauth redirect code and exchanges it for a token and the user info and sends that info to 
+Takes an Oauth redirect code and exchanges it for a token and the user info and sends that info to the following URL
 
 ```
 http://localhost:3827?user={"node_id":"value","avatar_url":"value","name":"value","token":"value"}
