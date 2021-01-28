@@ -1,9 +1,22 @@
 include .env
 export
+get:
+	go get 
+	go get github.com/golangci/golangci-lint/cmd/golangci-lint # Run lint
+.PHONY: get
+
+build:
+	go build -v ./...
+.PHONY: build
+
+
+test-ci:
+	go test -covermode=count -coverprofile=coverage.out ./...
+.PHONY: test
 
 test:
 	go test -v -coverprofile=cover.out ./...
-.PHONY: test
+.PHONY: test-ci
 
 run:
 	PORT=3000 go run main.go github.go
