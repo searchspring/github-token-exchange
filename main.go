@@ -75,5 +75,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			window.location.href = 'http://localhost:3827/?user=' + encodeURIComponent(JSON.stringify(user))
 		</script>
 		`
-	w.Write([]byte(html))
+	_, err = w.Write([]byte(html))
+	if err != nil {
+		http.Error(w, err.Error(), 403)
+		opsFailed.Inc()
+		return
+	}
 }

@@ -84,7 +84,9 @@ func TestChecks(t *testing.T) {
 
 func testFail(t *testing.T) {
 	defer func() {
+		//nolint
 		if r := recover(); r != nil {
+			// do nothing
 		}
 	}()
 	main()

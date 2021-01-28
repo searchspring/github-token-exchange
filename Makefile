@@ -1,8 +1,12 @@
-include .env
-export
+ifneq (,$(wildcard ./.env))
+    include .env
+    export
+        ENV_FILE_PARAM=--env-file .env
+endif
+
 get:
 	go get 
-	go get github.com/golangci/golangci-lint/cmd/golangci-lint # Run lint
+	go get github.com/golangci/golangci-lint/cmd/golangci-lint ]
 .PHONY: get
 
 build:
@@ -17,6 +21,10 @@ test-ci:
 test:
 	go test -v -coverprofile=cover.out ./...
 .PHONY: test-ci
+
+lint:
+	PATH=$(PATH):$(HOME)/go/bin golangci-lint run
+.PHONY: lint
 
 run:
 	PORT=3000 go run main.go github.go
