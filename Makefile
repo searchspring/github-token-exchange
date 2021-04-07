@@ -13,6 +13,9 @@ build:
 	go build -v ./...
 .PHONY: build
 
+tidy:
+	go mod tidy
+.PHONE: tidy
 
 test-ci:
 	go test -covermode=count -coverprofile=coverage.out ./...
