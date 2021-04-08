@@ -13,9 +13,9 @@ build:
 	go build -v ./...
 .PHONY: build
 
-tidy:
-	go mod tidy
-.PHONE: tidy
+clean:
+	go clean --modcache
+.PHONE: clean
 
 test-ci:
 	go test -covermode=count -coverprofile=coverage.out ./...

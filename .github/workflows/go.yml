@@ -32,8 +32,8 @@ jobs:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
 
-      - name: Tidy
-        run: make tidy
+      - name: Clean
+        run: make clean
 
       - name: Get dependencies
         run: make get
