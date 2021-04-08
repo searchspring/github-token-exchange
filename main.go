@@ -62,10 +62,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	clientID := os.Getenv("GITHUB_CLIENT_ID")
 	clientSecret := os.Getenv("GITHUB_CLIENT_SECRET")
 	redirectURL := os.Getenv("GITHUB_REDIRECT_URL")
-	fmt.Println(clientID, clientSecret, redirectURL)
+
 	user, err := githubDAO.GetUser(clientID, clientSecret, code, redirectURL)
 	if err != nil {
-		http.Error(w, err.Error(), 403)
+		http.Error(w, err.Error(), http.StatusForbidden)
 		opsFailed.Inc()
 		return
 	}
@@ -77,7 +77,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		`
 	_, err = w.Write([]byte(html))
 	if err != nil {
-		http.Error(w, err.Error(), 403)
+		http.Error(w, err.Error(), http.StatusForbidden)
 		opsFailed.Inc()
 		return
 	}
