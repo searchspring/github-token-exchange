@@ -5,7 +5,7 @@ ifneq (,$(wildcard ./.env))
 endif
 
 get:
-	go get 
+	go get -t -v
 	go get github.com/golangci/golangci-lint/cmd/golangci-lint
 .PHONY: get
 
@@ -13,6 +13,9 @@ build:
 	go build -v ./...
 .PHONY: build
 
+clean:
+	go clean --modcache
+.PHONE: clean
 
 test-ci:
 	go test -covermode=count -coverprofile=coverage.out ./...

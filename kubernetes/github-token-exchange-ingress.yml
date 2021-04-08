@@ -1,0 +1,14 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: github-token-exchange
+  namespace: microservices
+spec:
+  rules:
+    - host: token.kube.searchspring.io
+      http:
+        paths:
+          - backend:
+              serviceName: github-token-exchange
+              servicePort: 80
+            path: /
