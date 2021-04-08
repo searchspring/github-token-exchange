@@ -5,7 +5,7 @@ ifneq (,$(wildcard ./.env))
 endif
 
 get:
-	go get 
+	go get -t -v
 	go get github.com/golangci/golangci-lint/cmd/golangci-lint
 .PHONY: get
 
