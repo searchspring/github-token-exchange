@@ -1,4 +1,5 @@
-github-token-exchange
 .env
 cover.out
 coverage.out
+github-token-exchange
+!github-token-exchange/
