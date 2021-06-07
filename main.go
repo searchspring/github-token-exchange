@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"regexp"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -69,10 +70,27 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		opsFailed.Inc()
 		return
 	}
+
+	whitelist := []string{"http://localhost", "https://searchspring.github.io/snapp-explorer"}
+
+	url := "http://localhost:3827"
+	requestedRedirectURL := r.URL.Query().Get("redirect")
+
+	if (len(requestedRedirectURL) > 0) {
+		// check if in whitelist
+		for _, entry := range whitelist {
+			match, _ := regexp.MatchString("^" + entry, requestedRedirectURL)
+			if(match) {
+				url = requestedRedirectURL
+				break
+			}
+		}
+	}
+
 	html := `
 		<script>
 			let user = ` + string(user) + `
-			window.location.href = 'http://localhost:3827/?user=' + encodeURIComponent(JSON.stringify(user))
+			window.location.href = '` + string(url) + `' + '?user=' + encodeURIComponent(JSON.stringify(user))
 		</script>
 		`
 	_, err = w.Write([]byte(html))
