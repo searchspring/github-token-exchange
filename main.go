@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strings"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -45,6 +46,9 @@ func checks() {
 	if os.Getenv("GITHUB_CLIENT_SECRET") == "" {
 		panic("must set GITHUB_CLIENT_SECRET variable")
 	}
+	if os.Getenv("WHITELIST_REDIRECT_URLS") == "" {
+		panic("must set WHITELIST_REDIRECT_URLS variable")
+	}
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -63,6 +67,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	clientID := os.Getenv("GITHUB_CLIENT_ID")
 	clientSecret := os.Getenv("GITHUB_CLIENT_SECRET")
 	redirectURL := os.Getenv("GITHUB_REDIRECT_URL")
+	whitelistString := os.Getenv("WHITELIST_REDIRECT_URLS")
 
 	user, err := githubDAO.GetUser(clientID, clientSecret, code, redirectURL)
 	if err != nil {
@@ -71,8 +76,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	whitelist := []string{"http://localhost", "https://searchspring.github.io/snapp-explorer"}
-
+	whitelist := strings.Split(whitelistString, ",")
 	url := "http://localhost:3827"
 	requestedRedirectURL := r.URL.Query().Get("redirect")
 
