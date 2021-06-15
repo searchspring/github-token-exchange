@@ -46,8 +46,8 @@ func checks() {
 	if os.Getenv("GITHUB_CLIENT_SECRET") == "" {
 		panic("must set GITHUB_CLIENT_SECRET variable")
 	}
-	if os.Getenv("WHITELIST_REDIRECT_URLS") == "" {
-		panic("must set WHITELIST_REDIRECT_URLS variable")
+	if os.Getenv("ALLOWLIST_REDIRECT_URLS") == "" {
+		panic("must set ALLOWLIST_REDIRECT_URLS variable")
 	}
 }
 
@@ -67,7 +67,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	clientID := os.Getenv("GITHUB_CLIENT_ID")
 	clientSecret := os.Getenv("GITHUB_CLIENT_SECRET")
 	redirectURL := os.Getenv("GITHUB_REDIRECT_URL")
-	whitelistString := os.Getenv("WHITELIST_REDIRECT_URLS")
+	allowlistString := os.Getenv("ALLOWLIST_REDIRECT_URLS")
 
 	user, err := githubDAO.GetUser(clientID, clientSecret, code, redirectURL)
 	if err != nil {
@@ -76,17 +76,20 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	whitelist := strings.Split(whitelistString, ",")
+	allowlist := strings.Split(allowlistString, ",")
 	url := "http://localhost:3827"
 	requestedRedirectURL := r.URL.Query().Get("redirect")
 
 	if (len(requestedRedirectURL) > 0) {
-		// check if in whitelist
-		for _, entry := range whitelist {
-			match, _ := regexp.MatchString("^" + entry, requestedRedirectURL)
-			if(match) {
-				url = requestedRedirectURL
-				break
+		// check if in allowlist
+		for _, entry := range allowlist {
+			entry = strings.TrimSpace(entry)
+			if(len(entry) > 0) {
+				match, _ := regexp.MatchString("^" + entry, requestedRedirectURL)
+				if(match) {
+					url = requestedRedirectURL
+					break
+				}
 			}
 		}
 	}
