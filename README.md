@@ -13,6 +13,7 @@ Create a `.env` file and add the values:
 GITHUB_CLIENT_SECRET=*** find the secret in 1password ***
 GITHUB_CLIENT_ID=e02c8965ff92aa84b6ee
 GITHUB_REDIRECT_URL=http://localhost:3000
+ALLOWLIST_REDIRECT_URLS=http://localhost,https://localhost,https://searchspring.github.io/snapp-explorer
 ```
 
 Run the docker build
@@ -43,4 +44,5 @@ make run
 GITHUB_CLIENT_SECRET=*** find the secret in 1password ***
 GITHUB_CLIENT_ID=5df635731e7fa3513c1d
 GITHUB_REDIRECT_URL=https://token.kube.searchspring.io
+ALLOWLIST_REDIRECT_URLS=http://localhost,https://localhost,https://searchspring.github.io/snapp-explorer
 ```

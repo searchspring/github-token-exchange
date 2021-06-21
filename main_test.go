@@ -72,6 +72,7 @@ func TestChecks(t *testing.T) {
 	os.Setenv("GITHUB_CLIENT_SECRET", "")
 	os.Setenv("GITHUB_CLIENT_ID", "")
 	os.Setenv("GITHUB_REDIRECT_URL", "")
+	os.Setenv("ALLOWLIST_REDIRECT_URLS", "")
 	testFail(t)
 
 	os.Setenv("PORT", "8888")
@@ -80,6 +81,30 @@ func TestChecks(t *testing.T) {
 	testFail(t)
 	os.Setenv("GITHUB_CLIENT_ID", "aoeu")
 	testFail(t)
+	os.Setenv("ALLOWLIST_REDIRECT_URLS", "http://localhost,https://localhost,https://searchspring.github.io/snapp-explorer")
+	testFail(t)
+	os.Setenv("ALLOWLIST_REDIRECT_URLS", "http://localhost,https://localhost ,  https://searchspring.github.io/snapp-explorer, ")
+	testFail(t)
+}
+
+func TestAllowlistPass(t *testing.T) {
+	githubDAO = &mockDAO{Override: simple}
+	res := httptest.NewRecorder()
+	handler(res, httptest.NewRequest("GET", "http://localhost:1231/?code=blah&redirect=https://searchspring.github.io/snapp-explorer", nil))
+	body, err := ioutil.ReadAll(res.Body)
+	require.Nil(t, err)
+	require.True(t, strings.Contains(string(body), "https://searchspring.github.io/snapp-explorer"))
+	require.False(t, strings.Contains(string(body), "http://localhost:3827"))
+}
+
+func TestAllowlistFail(t *testing.T) {
+	githubDAO = &mockDAO{Override: simple}
+	res := httptest.NewRecorder()
+	handler(res, httptest.NewRequest("GET", "http://localhost:1231/?code=blah&redirect=https://dne.searchspring.io", nil))
+	body, err := ioutil.ReadAll(res.Body)
+	require.Nil(t, err)
+	require.True(t, strings.Contains(string(body), "http://localhost:3827"))
+	require.False(t, strings.Contains(string(body), "https://dne.searchspring.io"))
 }
 
 func testFail(t *testing.T) {

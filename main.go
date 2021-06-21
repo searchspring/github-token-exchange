@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"regexp"
+	"strings"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -44,6 +46,9 @@ func checks() {
 	if os.Getenv("GITHUB_CLIENT_SECRET") == "" {
 		panic("must set GITHUB_CLIENT_SECRET variable")
 	}
+	if os.Getenv("ALLOWLIST_REDIRECT_URLS") == "" {
+		panic("must set ALLOWLIST_REDIRECT_URLS variable")
+	}
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -62,6 +67,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	clientID := os.Getenv("GITHUB_CLIENT_ID")
 	clientSecret := os.Getenv("GITHUB_CLIENT_SECRET")
 	redirectURL := os.Getenv("GITHUB_REDIRECT_URL")
+	allowlistString := os.Getenv("ALLOWLIST_REDIRECT_URLS")
 
 	user, err := githubDAO.GetUser(clientID, clientSecret, code, redirectURL)
 	if err != nil {
@@ -69,10 +75,29 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		opsFailed.Inc()
 		return
 	}
+
+	allowlist := strings.Split(allowlistString, ",")
+	url := "http://localhost:3827"
+	requestedRedirectURL := r.URL.Query().Get("redirect")
+
+	if (len(requestedRedirectURL) > 0) {
+		// check if in allowlist
+		for _, entry := range allowlist {
+			entry = strings.TrimSpace(entry)
+			if(len(entry) > 0) {
+				match, _ := regexp.MatchString("^" + entry, requestedRedirectURL)
+				if(match) {
+					url = requestedRedirectURL
+					break
+				}
+			}
+		}
+	}
+
 	html := `
 		<script>
 			let user = ` + string(user) + `
-			window.location.href = 'http://localhost:3827/?user=' + encodeURIComponent(JSON.stringify(user))
+			window.location.href = '` + string(url) + `' + '?user=' + encodeURIComponent(JSON.stringify(user))
 		</script>
 		`
 	_, err = w.Write([]byte(html))
