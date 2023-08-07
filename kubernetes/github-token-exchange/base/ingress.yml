@@ -4,6 +4,7 @@ metadata:
   name: github-token-exchange
   namespace: microservices
 spec:
+  ingressClassName: nginx-ext
   rules:
     - host: token.kube.searchspring.io
       http:
