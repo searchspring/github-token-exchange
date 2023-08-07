@@ -5,7 +5,7 @@ metadata:
   namespace: microservices
 spec:
   rules:
-    - host: token2.kube.searchspring.io
+    - host: token.kube.searchspring.io
       http:
         paths:
           - backend:
