@@ -3,6 +3,9 @@ kind: Ingress
 metadata:
   name: github-token-exchange
   namespace: microservices
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.org/redirect-to-https: 'true'
 spec:
   ingressClassName: nginx-ext
   rules:
