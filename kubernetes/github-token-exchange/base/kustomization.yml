@@ -1,7 +1,0 @@
-namespace: microservices
-resources:
-  - configmap.yml
-  - deploy.yml
-  - ingress.yml
-  - secret.yml
-  - service.yml
